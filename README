@@ -116,7 +116,7 @@ RULES
     Nested arrays use a colon to modify the key.
             $data  =   {key => ["val1", "val2"]};
             $flat  === {"key:0" => "val1", "key:1" => "val2"};
-            $query eq  "key:0=val1&key1=val2"
+            $query eq  "key:0=val1&key:1=val2"
 
             ########
 
@@ -138,7 +138,7 @@ RULES
             $flat  === {":0:0:0" => "val"}
             $query eq  ":0:0:0=val"
 
-    Keys in flat arrays MAY begin with a leading dot
+    Keys in flat hashrefs MAY begin with a leading dot
         A leading dot may disambiguate some cases.
 
             $query =   ".foo=bar"
@@ -278,6 +278,20 @@ BUGS
     Circular refs are not detected. Any attempt to dump a struture with
     cirular refs will result in an infinite loop. There is no immediate plan
     to add circular ref tracking.
+
+SEE ALSO
+    All of the following have attempted to solve the same problem as
+    Data::URIEncode. All of them (including Data::URIEncode) suffer from the
+    problem of being hard to find for the specific purpose. Hash::Flatten is
+    probably the only suitable replacement for Data::URIEncode.
+
+    Hash::Flatten
+
+    CGI::Expand
+
+    HTTP::Rollup
+
+    CGI::State
 
 AUTHOR
     Paul Seamons perlspam at seamons dot com

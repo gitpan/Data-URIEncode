@@ -17,7 +17,7 @@ use vars qw($VERSION
             );
 
 BEGIN {
-    $VERSION           = '0.10';
+    $VERSION           = '0.11';
     @EXPORT_OK         = qw(flat_to_complex complex_to_flat query_to_complex complex_to_query);
     $MAX_ARRAY_EXPAND  = 100;
     $DUMP_BLESSED_DATA = 1 if ! defined $DUMP_BLESSED_DATA;
@@ -45,9 +45,6 @@ sub flat_to_complex {
             if (ref $ref eq 'ARRAY') {
                 if (! exists $ref->[$name]) {
                     $ref->[$name] = $sep eq ':' ? [] : {};
-                } else {
-                    die "Can't coerce array into hash near \"$name\" while unfolding $key"
-                        if $sep ne ':';
                 }
                 die "Can't use $name as index value for an array while unfolding $key"
                     if $name !~ /^\d+$/;
@@ -112,7 +109,8 @@ sub complex_to_flat {
         }
     } elsif (UNIVERSAL::isa($in, 'HASH')) {
         die "Not handling blessed HASH" if ref $in ne 'HASH' && ! $DUMP_BLESSED_DATA;
-        while (my($key, $val) = each %$in) {
+        foreach my $key (keys %$in) {
+            my $val = $in->{$key};
             if (ref $val) {
                 complex_to_flat($val, $out, "$prefix."._flatten_escape($key));
             } else {
@@ -316,7 +314,7 @@ $data using flat_to_complex and query_to_complex respectively.
 
     $data  =   {key => ["val1", "val2"]};
     $flat  === {"key:0" => "val1", "key:1" => "val2"};
-    $query eq  "key:0=val1&key1=val2"
+    $query eq  "key:0=val1&key:1=val2"
 
     ########
 
@@ -339,7 +337,7 @@ arrayref.
     $flat  === {":0:0:0" => "val"}
     $query eq  ":0:0:0=val"
 
-=item Keys in flat arrays MAY begin with a leading dot
+=item Keys in flat hashrefs MAY begin with a leading dot
 
 A leading dot may disambiguate some cases.
 
@@ -497,6 +495,21 @@ skipped.
 Circular refs are not detected.  Any attempt to dump a struture with
 cirular refs will result in an infinite loop.  There is no immediate plan to
 add circular ref tracking.
+
+=head1 SEE ALSO
+
+All of the following have attempted to solve the same problem as Data::URIEncode.
+All of them (including Data::URIEncode) suffer from the problem of being hard
+to find for the specific purpose.  Hash::Flatten is probably the only suitable
+replacement for Data::URIEncode.
+
+L<Hash::Flatten>
+
+L<CGI::Expand>
+
+L<HTTP::Rollup>
+
+L<CGI::State>
 
 =head1 AUTHOR
 
